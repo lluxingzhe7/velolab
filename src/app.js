@@ -778,8 +778,11 @@ async function enterPhoneMode() {
   if (STATIC_HOST) {
     const a = el("phone-url");
     if (a) {
-      a.textContent = "静态托管版本没有手机联动（需要在本机运行 node server.mjs）";
-      a.removeAttribute("href");
+      // 静态版没有中继：直接把用户指到本机版，免得在这页等手机
+      a.textContent = "点这里打开本机版 http://127.0.0.1:4173/（先双击「启动手机联动.bat」）";
+      a.href = "http://127.0.0.1:4173/";
+      a.target = "_blank";
+      a.rel = "noopener";
     }
     const ping = el("phone-ping");
     if (ping) ping.parentNode && ping.parentNode.classList.add("is-hidden");
