@@ -750,6 +750,7 @@ function connectLive() {
 /* 打开电脑页面就自动进入房间待命：手机一开推流就能连上，
    不用先手点「手机联动」。想关掉可在地址后加 ?nolink=1。 */
 let autoLinkTried = false;
+let autoLinkTimer = null;
 async function autoStartLink() {
   if (STATIC_HOST) return;
   if (typeof WebSocket !== "function") return;
@@ -763,6 +764,14 @@ async function autoStartLink() {
   } catch (e) { /* 取不到就用 URL 里的 code */ }
   try { connectLive(); } catch (e) { return; }
   refreshLinkState();
+  // 首次连接可能撞上服务刚启动/网络抖动：每 5 秒补一次，连上就不再折腾
+  if (!autoLinkTimer) {
+    autoLinkTimer = setInterval(() => {
+      if (state.linkOff) return;
+      if (state.live && state.live.ready) return;
+      try { connectLive(); } catch (e) { /* 忽略 */ }
+    }, 5000);
+  }
 }
 
 async function enterPhoneMode() {
@@ -1560,6 +1569,7 @@ function setMode(mode) {
     layoutCanvas("video");
   } else if (mode === "phone") {
     state.recording = false;
+    state.linkOff = false;        // 手动进来就重新待命
     state.liveFrames = [];
     layoutCanvas("phone");
     // 进入手机联动先清掉演示模式的旧数值，等手机推流后由 updateHud 填回
@@ -1575,6 +1585,7 @@ function setMode(mode) {
     enterPhoneMode();
   }
   if (prev === "phone" && mode !== "phone") {
+    state.linkOff = true;         // 主动离开，别被自动重连/手机推流拉回来
     if (state.live) { state.live.close(); state.live = null; }
     state.phoneBlob = null;
     if (state.phoneBmp && state.phoneBmp.close) state.phoneBmp.close();
@@ -1773,6 +1784,18 @@ function init() {
   });
   refreshPanes();
   autoStartLink();
+
+  // 顶栏连接状态可以点：连不上时手动重连一次
+  const linkBox = el("link-state");
+  if (linkBox) {
+    linkBox.addEventListener("click", () => {
+      if (STATIC_HOST) { setStatus("静态托管版没有手机联动，需要在本机运行 node server.mjs"); return; }
+      state.linkOff = false;
+      if (state.live) { try { state.live.close(); } catch (e) { /* ignore */ } state.live = null; }
+      try { connectLive(); } catch (e) { setStatus("重连失败：本机服务没起来？先双击「启动手机联动.bat」"); return; }
+      setStatus("已重新连接中继，等手机打开页面推流");
+    });
+  }
 
   // 开发/自检用入口：让无头浏览器能喂合成帧，验证「实时判定 → 结果页」这条链
   if (typeof window !== "undefined") {
