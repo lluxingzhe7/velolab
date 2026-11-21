@@ -157,6 +157,9 @@
 .phone-help a { color: #c9f25c; }
 
 /* ---------- 手机联动：自动分析状态（替代被隐藏的「开始采样」） ---------- */
+.phone-short{font-size:12px;line-height:1.7;color:#8b98a9;margin:6px 0 0;}
+.phone-short code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#d7e0ea;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;}
+
 .live-pill {
   display: inline-flex;
   align-items: center;

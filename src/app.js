@@ -762,6 +762,8 @@ async function enterPhoneMode() {
       const url = "https://" + ip + ":" + port + "/phone.html?code=" + info.code;
       const a = el("phone-url");
       if (a) { a.textContent = url; a.href = url; }
+      const short = el("phone-short");
+      if (short) short.textContent = "https://" + ip + ":" + port + "/phone.html";
       const ping = el("phone-ping");
       if (ping) {
         const pingUrl = "http://" + ip + ":" + (info.httpPort || 4173) + "/ping";
