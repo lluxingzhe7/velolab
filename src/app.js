@@ -418,6 +418,10 @@ let liveProgressAt = 0;
 
 function onPhoneFrame(blob) {
   phonePerf.recv += 1;
+  // 手机一开推流就自动切到「手机联动」视图：电脑页面开着就行，不用先点模式按钮
+  if (state.mode !== "phone") {
+    try { setMode("phone"); } catch (e) { /* 忽略：DOM 桩环境 */ }
+  }
   state.liveCount = (state.liveCount || 0) + 1;
   state.liveLast = performance.now();
   if (state.liveCount === 1) setStatus("已收到手机画面，正在识别骑手姿态…");
@@ -725,9 +729,13 @@ function connectLive() {
     code: screenCode(),
     onFrame: (blob) => { onPhoneFrame(blob); },
     onStatus: (kind) => {
-      if (kind === "open") { setLinkState(true, "等待手机"); setStatus("电脑已连上中继，等手机打开页面后开始推流"); }
-      if (kind === "close") setLinkState(false, "未连接");
-      if (kind === "joined") setLinkState(true, "已连接");
+      const inPhone = state.mode === "phone";
+      if (kind === "open") {
+        setLinkState(true, "手机待命");
+        if (inPhone) setStatus("电脑已连上中继，等手机打开页面后开始推流");
+      }
+      if (kind === "close") setLinkState(false, inPhone ? "未连接" : "待命断开");
+      if (kind === "joined") { setLinkState(true, "手机待命"); if (inPhone) refreshLinkState(); }
     },
     onPeers: (info) => {
       if (!info) return;
@@ -737,6 +745,24 @@ function connectLive() {
     },
   });
   return state.live;
+}
+
+/* 打开电脑页面就自动进入房间待命：手机一开推流就能连上，
+   不用先手点「手机联动」。想关掉可在地址后加 ?nolink=1。 */
+let autoLinkTried = false;
+async function autoStartLink() {
+  if (STATIC_HOST) return;
+  if (typeof WebSocket !== "function") return;
+  if (typeof location !== "undefined" && /[?&]nolink=1/.test(location.search)) return;
+  if (autoLinkTried) return;
+  autoLinkTried = true;
+  // 房间码必须和手机一致：先问服务器要当前码，再用它进房间
+  try {
+    const info = await fetchShareInfo();
+    if (info && info.code) state.shareCode = String(info.code).toUpperCase();
+  } catch (e) { /* 取不到就用 URL 里的 code */ }
+  try { connectLive(); } catch (e) { return; }
+  refreshLinkState();
 }
 
 async function enterPhoneMode() {
@@ -1746,6 +1772,7 @@ function init() {
     }
   });
   refreshPanes();
+  autoStartLink();
 
   // 开发/自检用入口：让无头浏览器能喂合成帧，验证「实时判定 → 结果页」这条链
   if (typeof window !== "undefined") {
