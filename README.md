@@ -206,7 +206,7 @@ node test/cert-check.mjs # 自签证书能被 TLS 校验通过
 - 建议基于公开的 fitting 经验区间，不替代专业 fitter 或运动医学诊断。
 ## 九、发布到 GitHub Pages
 
-静态版不包含 `server.mjs`（手机联动的 WebSocket 中继）与测试/证书，只发布浏览器真正需要的文件：
+Pages 只会「托管静态文件」，不会执行 Node 服务。`server.mjs` 与两个 `.bat` 只是随仓库一起分发（换电脑时可直接下载来跑本机版），在 github.io 上访问不到任何联动能力：
 
 ```bash
 node tools/build-pages.mjs     # 产物在 dist/，约 33MB（大头是 MediaPipe 的 wasm 与模型）
@@ -218,3 +218,20 @@ cd dist && git add -A && git commit -m "update" && git push
 - 构建脚本会保留 `dist/.git`，可以反复构建 + 增量提交；不要 `rm -rf dist`，否则 git 会落到外层仓库上。
 - 静态版对「手机联动」显式降级：检测到 `*.github.io` 时不连 WebSocket，直接说明「需要在本机运行 node server.mjs」，避免静默失败。
 - 自检：`test/pages-check.mjs`（无头浏览器打开页面 → 演示渲染 → 采样出结果 → 手机模式提示），可加 `APP_URL=https://lluxingzhe7.github.io/velolab/` 直接测线上。
+
+## 十、换一台电脑还能用手机联动吗
+
+能。手机联动只依赖「同一局域网里有一台电脑跑着 `server.mjs`」，跟具体是哪台电脑无关：
+
+1. 在新电脑上装 Node.js（LTS 版）：<https://nodejs.org>
+2. 把项目拷过去，或直接下载整个仓库 <https://github.com/lluxingzhe7/velolab>（里面已含 `server.mjs`、`src/cert.mjs`、两个 .bat 和 MediaPipe 模型，不用 npm install）
+3. 双击 `启动手机联动.bat`：它会自动找 node、起服务并打开 <http://127.0.0.1:4173/>
+4. 第一次运行 Windows 会弹防火墙提示，允许「专用网络」；没弹就双击 `开启手机访问.bat`（需管理员）放行 TCP 4173
+5. 手机连同一个 Wi-Fi，打开 `https://<新电脑的局域网IP>:4173/phone.html`（IP 会打印在服务窗口的启动日志里；房间码自动同步，不用手改）
+
+注意事项：
+
+- github.io 那个静态版换哪台电脑都不能联动——它是静态托管，不是服务器，浏览器之间没法直连。
+- 每台电脑有自己的 IP 与防火墙规则，换电脑就用那台电脑的 IP；路由器重启后 IP 可能变，重看日志即可。
+- 证书是每台电脑第一次运行时自签的，手机第一次打开会提示「不安全」→ 高级 → 继续访问。
+- 跨网络（手机走 4G、或不在同一 Wi-Fi）目前不支持，需要公网中继或内网穿透，本项目没做。
