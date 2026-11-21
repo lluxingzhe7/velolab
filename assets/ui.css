@@ -1,0 +1,191 @@
+/* 可读性层 + 参数说明浮层：放在 style.css 之后，覆盖字号与新增浮层样式 */
+
+/* ---------- 字号与密度（整体放大，右侧表单优先） ---------- */
+.brand-text h1 { font-size: 15.5px; }
+.brand-text h1 span { font-size: 12px; }
+.mode-btn { font-size: 13.5px; padding: 7px 13px; }
+.link-state { font-size: 12.5px; }
+
+.tabs { gap: 2px; }
+.tab { font-size: 14px; padding: 12px 13px; }
+.pane { padding: 20px 20px 28px; }
+.legend, fieldset legend { font-size: 11.5px; letter-spacing: .08em; }
+
+.field { grid-template-columns: 152px minmax(0, 1fr); align-items: center; min-height: 50px; margin-bottom: 4px; }
+.field > label { font-size: 13.5px; line-height: 1.35; color: #3a4453; }
+.field .input input,
+.field .input select { height: 40px; font-size: 15px; padding: 0 12px; }
+.field .input input[type="range"] { height: 26px; padding: 0; }
+.field .input .u { font-size: 11.5px; }
+#flex-val { font-size: 13.5px; }
+
+.hint { font-size: 12.5px; line-height: 1.75; }
+.help summary { font-size: 13px; }
+.help li, .help p { font-size: 12.5px; line-height: 1.75; }
+.help code { font-size: 11.5px; }
+
+.setup-sum h3 { font-size: 12px; }
+.setup-sum dt, .setup-sum dd { font-size: 13.5px; }
+
+.mode-tip, .phone-hint, .stage-note { font-size: 12px; }
+.slider-field span { font-size: 12.5px; }
+.slider-field b { font-size: 12.5px; }
+.rec-status { font-size: 12.5px; }
+.btn { font-size: 13.5px; }
+
+.hud-k { font-size: 11px; }
+.hud-t { font-size: 11px; }
+.hud strong b { font-size: 27px; }
+.hud-meta { font-size: 11.5px; }
+
+.sub { font-size: 12.5px; }
+.item .part { font-size: 13.5px; }
+.item .why { font-size: 12.5px; }
+.item .act { font-size: 13px; }
+.metric .k { font-size: 13px; }
+.metric .v b { font-size: 26px; }
+.metric .t, .metric .track-axis { font-size: 11.5px; }
+.verdict h3 { font-size: 14px; }
+.report { font-size: 13.5px; }
+.report table { font-size: 13px; }
+
+@media (min-width: 1081px) {
+  .layout { grid-template-columns: minmax(0, 1.8fr) minmax(430px, 500px); }
+}
+
+/* ---------- 参数名：可悬停提示 ---------- */
+.field > label[data-tip],
+.hud-card[data-tip] { cursor: help; }
+.field > label[data-tip] {
+  border-bottom: 1px dashed rgba(11, 15, 20, .26);
+  padding-bottom: 1px;
+  width: fit-content;
+}
+.field > label[data-tip]::after {
+  content: "?";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #eef1f6;
+  color: #6b7686;
+  font-size: 9.5px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.field > label[data-tip]:hover { color: #0b0f14; border-bottom-color: #8fbf3f; }
+
+.tip-lead {
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #f5f8ef;
+  border: 1px solid #e4ecd2;
+  color: #4a5a33;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* ---------- 浮层本体 ---------- */
+.tip {
+  position: fixed;
+  z-index: 90;
+  width: 328px;
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  padding: 14px 16px 13px;
+  border-radius: 14px;
+  border: 1px solid #e1e6ee;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(11, 15, 20, .2), 0 2px 6px rgba(11, 15, 20, .06);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease, visibility .12s;
+  pointer-events: none;
+}
+.tip.on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+.tip h4 {
+  margin: 0 0 9px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #0b0f14;
+}
+.tip-fig {
+  margin: 0 0 10px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  border: 1px solid #eaeef5;
+  background: #f8fafd;
+}
+.tip-svg { display: block; width: 100%; height: auto; }
+.tip p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.72;
+  color: #37404d;
+}
+.tip p:last-child { margin-bottom: 0; }
+.tip .tip-range {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e6eaf1;
+  color: #6b7686;
+  font-size: 12.5px;
+}
+@media (max-width: 640px) {
+  .tip { width: 300px; }
+}
+
+/* 手机联动面板在深色舞台上，帮助文字要提亮，否则看不清 */
+.phone-help > summary { color: #e2e9f2; font-size: 13px; }
+.phone-help > summary::before { border-color: rgba(255, 255, 255, 0.35); color: #cdd8e6; }
+.phone-help[open] > summary::before { background: #c9f25c; border-color: #c9f25c; color: #0c1424; }
+.phone-help ul, .phone-help ol { color: #c8d3e0; font-size: 12.5px; line-height: 1.85; }
+.phone-help li { margin-bottom: 7px; }
+.phone-help li b, .phone-help p b { color: #ffffff; }
+.phone-help p { color: #c8d3e0; }
+.phone-help code {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #eef3fa;
+}
+.phone-help a { color: #c9f25c; }
+
+/* ---------- 手机联动：自动分析状态（替代被隐藏的「开始采样」） ---------- */
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(201, 242, 92, 0.16);
+  color: #dff6a8;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.live-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c9f25c;
+  box-shadow: 0 0 0 3px rgba(201, 242, 92, 0.18);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.live-progress {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.5px;
+  color: #b9c6d4;
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .live-progress { white-space: normal; }
+}
