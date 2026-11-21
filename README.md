@@ -1,5 +1,7 @@
 # BikeFit · 骑行姿态拟合
 
+> **在线试用：<https://lluxingzhe7.github.io/velolab/>**
+> 那是 GitHub Pages 的静态版：演示、摄像头、视频、照片、疼痛、记录、报告都能用；**手机实时联动**需要 WebSocket 中继，请在本机跑 `node server.mjs` 用局域网地址访问。
 把 MyVeloFit、Posely、PedalPro 三款商业 fitting 工具的核心能力，用零依赖的纯前端实现成一套自用工作台：
 **演示模拟 → 摄像头视频采样 → 单张照片标定 → 角度报告 → 毫米级调整 → 疼痛定位 → 历史对比 → 打印报告**。
 
@@ -173,3 +175,17 @@ node test/cert-check.mjs # 自签证书能被 TLS 校验通过
 - 识别的是 33 个身体关键点，踩踏周期由膝角随时间的波峰/波谷推出，不是「动作识别」；不做三维重建，不测功率、足底压力、关节受力。
 - 单摄像头只能可靠跟踪靠镜头那一侧；两条腿重叠时可能跟错腿，左右对比请分别拍。
 - 建议基于公开的 fitting 经验区间，不替代专业 fitter 或运动医学诊断。
+## 九、发布到 GitHub Pages
+
+静态版不包含 `server.mjs`（手机联动的 WebSocket 中继）与测试/证书，只发布浏览器真正需要的文件：
+
+```bash
+node tools/build-pages.mjs     # 产物在 dist/，约 33MB（大头是 MediaPipe 的 wasm 与模型）
+cd dist && git add -A && git commit -m "update" && git push
+```
+
+- 站点：<https://lluxingzhe7.github.io/velolab/> · 仓库：<https://github.com/lluxingzhe7/velolab>
+- Pages 源：main 分支根目录；已写入 `.nojekyll`，避免下划线目录被 Jekyll 忽略。
+- 构建脚本会保留 `dist/.git`，可以反复构建 + 增量提交；不要 `rm -rf dist`，否则 git 会落到外层仓库上。
+- 静态版对「手机联动」显式降级：检测到 `*.github.io` 时不连 WebSocket，直接说明「需要在本机运行 node server.mjs」，避免静默失败。
+- 自检：`test/pages-check.mjs`（无头浏览器打开页面 → 演示渲染 → 采样出结果 → 手机模式提示），可加 `APP_URL=https://lluxingzhe7.github.io/velolab/` 直接测线上。
